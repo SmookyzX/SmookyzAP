@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmookyzAP", "SmookyzAP\SmookyzAP.csproj", "{B2E071C7-2372-4560-B8BD-C1E35DEFF074}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2E071C7-2372-4560-B8BD-C1E35DEFF074}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2E071C7-2372-4560-B8BD-C1E35DEFF074}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2E071C7-2372-4560-B8BD-C1E35DEFF074}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2E071C7-2372-4560-B8BD-C1E35DEFF074}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BF752596-E04C-43EE-9A4B-E1838AAC9DCD}
+	EndGlobalSection
+EndGlobal
