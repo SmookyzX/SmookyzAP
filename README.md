@@ -1,7 +1,7 @@
 Discord: smookyz2024
 
 This autopotion solution aims to even the playing field for all WoE players allowing even the 300+ ping players to pot similar or EVEN FASTER than 50 ping players when the current hp drops.
-The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain when your ping is 40 or greater.
+The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain when your ping is 50 or greater.
 
 I put all the code into the program.cs file to make it easier for newer or beginner programmers to ctrl+f and edit what they need to add. I kept it singlethreaded as multithreading provides no advantage here.
 
