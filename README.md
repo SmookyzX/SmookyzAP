@@ -9,7 +9,7 @@ Explanation -> https://www.youtube.com/watch?v=P06RzfgapOg
 
 SmookyzAP in action -> https://www.youtube.com/watch?v=ecfqVSuzZu8
 
-As you can see, I can survive even comas with no devotion while being on top of enemy meteor spam.
+As you can see, I can survive even comas with no devotion while being on top of enemy meteor spam. I maintain almost 500fps even while using the program.
 
 Instructions:
 
