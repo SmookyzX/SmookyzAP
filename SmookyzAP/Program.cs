@@ -50,7 +50,7 @@ namespace Smookyz
                        truesightKey = -1, abrasiveKey = -1, autoguardKey = -1,
                        reflectshieldKey = -1, defenderKey = -1;
             // Adjustable SP threshold (percentage)
-            public double spThreshold = 40.0;
+            public double spThreshold = -1;
 
             public int pauseKey = 0x24;
             public string windowTitle = "HoneyRO ~";
@@ -136,7 +136,7 @@ namespace Smookyz
                 defenderKey=
 
             [Settings]
-                spThreshold=40.0
+                spThreshold=
                 windowTitle=HoneyRO ~
                 baseAddress=010DCE10
                 autoBuffDelay=50
@@ -261,7 +261,7 @@ namespace Smookyz
                 return;
             }
 
-            if (config.spKey != -1 && Percent(status.spValue, status.spMax) < spThreshold)
+            if (config.spKey != -1 && Percent(status.spValue, status.spMax) < config.spThreshold)
             {
                 PressKey(hWnd, config.spKey, 15);
                 return;
