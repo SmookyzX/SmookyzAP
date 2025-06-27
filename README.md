@@ -15,6 +15,7 @@ Instructions:
 
 Remember, you need a huge supply of HP potions so this is intended for Midrate or WoE-Competitive Servers.
 This potter will always spam the HP Key. Watch the Explanation video please.
+You also need a grf with the proper stateicons + tgas for the buffs. Default data.grf has it all except the box of sunlight but I am sure woe players by now have it all.
 There is a "Pause" hotkey that you can configure in the config.ini file. This will pause the Permanent HP key press but it does not pause the entire program. That means it will behave as a regular autopotter while paused.
 Edit the autobuffdelay as your ping allows (also in the config.ini)
 
