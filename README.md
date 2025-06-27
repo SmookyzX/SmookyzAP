@@ -1,5 +1,9 @@
 Discord: smookyz2024
 
+*** REQUIRED TO DOWNLOAD .NET Runtime 8.0 for it to work *** 
+
+Download .NET runtime 8.0 -> https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
 This autopotion solution aims to even the playing field for all WoE players allowing even the 300+ ping players to pot similar or EVEN FASTER than 50 ping players when the current hp drops.
 The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain when your ping is 50 or greater. You can still use it if your ping is below 50. Just pause the program using the pause key. The pause key only disables the constant hp key spam. It will end up behaving like a reguar autopotter
 
@@ -12,10 +16,6 @@ SmookyzAP in action -> https://www.youtube.com/watch?v=ecfqVSuzZu8
 As you can see, I can survive even comas with no devotion while being on top of enemy meteor spam. I maintain almost 500fps even while using the program.
 
 Instructions:
-
-*** REQUIRED TO DOWNLOAD .NET Runtime 8.0 for it to work *** 
-
-Download .NET runtime 8.0 -> https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 
 Remember, you need a huge supply of HP potions so this is intended for Midrate or WoE-Competitive Servers.
 This potter will always spam the HP Key. Watch the Explanation video please.
