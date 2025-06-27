@@ -9,7 +9,7 @@ Explanation -> https://www.youtube.com/watch?v=P06RzfgapOg
 
 SmookyzAP in action -> https://www.youtube.com/watch?v=ecfqVSuzZu8
 
-As you can see, I can survive even comas with no devotion and being on top of meteor spam.
+As you can see, I can survive even comas with no devotion while being on top of enemy meteor spam.
 
 Instructions:
 
