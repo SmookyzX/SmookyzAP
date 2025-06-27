@@ -19,5 +19,3 @@ There is a "Pause" hotkey that you can configure in the config.ini file. This wi
 Edit the autobuffdelay as your ping allows (also in the config.ini)
 
 You can edit the memory address in the config.ini and also the window title to make it work for other servers. You only need the current HP address. 
-
-Maybe I'll release a skill spammer in the future as well.
