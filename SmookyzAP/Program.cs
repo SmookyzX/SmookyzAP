@@ -266,6 +266,11 @@ namespace Smookyz
                 PressKey(hWnd, config.spKey, 15);
                 return;
             }
+            if (config.speedKey != -1 && !buffs.speed)
+            {
+                PressKey(hWnd, config.speedKey, config.autoBuffDelay);
+                return;
+            }
 
             if (config.resentmentKey != -1 && !buffs.resentment)
             {
@@ -295,11 +300,6 @@ namespace Smookyz
             if (config.sunKey != -1 && !buffs.sun)
             {
                 PressKey(hWnd, config.sunKey, config.autoBuffDelay);
-                return;
-            }
-            if (config.speedKey != -1 && !buffs.speed)
-            {
-                PressKey(hWnd, config.speedKey, config.autoBuffDelay);
                 return;
             }
             if (config.fireKey != -1 && !buffs.fire)
