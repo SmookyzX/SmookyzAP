@@ -6,7 +6,9 @@ The bottleneck is the default item usage delay of 100ms. This means there is no 
 I put all the code into the program.cs file to make it easier for newer or beginner programmers to ctrl+f and edit what they need to add. 
 
 Explanation -> https://www.youtube.com/watch?v=P06RzfgapOg
+
 SmookyzAP in action -> https://www.youtube.com/watch?v=ecfqVSuzZu8
+
 As you can see, I can survive even comas with no devotion and being on top of meteor spam.
 
 Instructions:
