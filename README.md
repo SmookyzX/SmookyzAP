@@ -13,7 +13,10 @@ As you can see, I can survive even comas with no devotion while being on top of 
 
 Instructions:
 
-Download .net runtime 8.0 -> https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+*** REQUIRED TO DOWNLOAD .NET Runtime 8.0 for it to work *** 
+
+Download .NET runtime 8.0 -> https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
 Remember, you need a huge supply of HP potions so this is intended for Midrate or WoE-Competitive Servers.
 This potter will always spam the HP Key. Watch the Explanation video please.
 You also need a grf with the proper stateicons + tgas for the buffs. Default data.grf has it all except the box of sunlight but I am sure woe players by now have it all.
