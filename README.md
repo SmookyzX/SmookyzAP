@@ -4,6 +4,10 @@ Discord: smookyz2024
 
 Download .NET runtime 8.0 -> https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 
+*** You may need to "Unblock" the files. Right click on each extracted file. Click properties. At the bottom, there might be an "Unblock" checkbox. Unblock it and hit apply. Do this for all files. ***
+
+
+
 This autopotion solution aims to even the playing field for all WoE players allowing even the 300+ ping players to pot similar or EVEN FASTER than 50 ping players when the current hp drops.
 The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain when your ping is 50 or greater. You can still use it if your ping is below 50. Just pause the program using the pause key. The pause key only disables the constant hp key spam. It will end up behaving like a reguar autopotter
 
