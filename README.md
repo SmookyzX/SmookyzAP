@@ -1,7 +1,7 @@
 Discord: smookyz2024
 
 This autopotion solution aims to even the playing field for all WoE players allowing even the 300+ ping players to heal similar or EVEN BETTER than 50 ping players.
-The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain.
+The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain when your ping is 40 or greater.
 
 I put all the code into the program.cs file to make it easier for newer or beginner programmers to ctrl+f and edit what they need to add. 
 
