@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -24,9 +25,17 @@ namespace Smookyz
         [DllImport("user32.dll")]
         public static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
 
+        [DllImport("kernel32.dll")]
+        static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out int lpNumberOfBytesWritten);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
+
         const int PROCESS_ALL_ACCESS = 0x1F0FFF;
         const uint WM_KEYDOWN = 0x0100;
         const uint WM_KEYUP = 0x0101;
+
+        static bool spammerRunning = false;
 
         struct PlayerStatus
         {
@@ -49,6 +58,7 @@ namespace Smookyz
                        strKey = -1, statusRecoveryKey = -1, gloriaKey = -1,
                        truesightKey = -1, abrasiveKey = -1, autoguardKey = -1,
                        reflectshieldKey = -1, defenderKey = -1;
+
             // Adjustable SP threshold (percentage)
             public double spThreshold = -1;
 
@@ -56,8 +66,19 @@ namespace Smookyz
             public string windowTitle = "HoneyRO ~";
             public int baseAddress = 0x010DCE10;
             public int autoBuffDelay = 50;
-        }
 
+            public List<int> skillSpamKeys = new();
+            public int skillSpamDelay = 1;
+            public int mouseBoostAddress = -1;
+            public int holdKey = -1;
+            public int holdKeyDelay = 29;
+
+            public int whipKey = -1;
+            public int pdfmKey = -1;
+            public int combatKnifeKey = -1;
+            public int pdfmDelay = 100;
+            public int combatKnifeDelay = 100;
+        }
         static readonly Dictionary<string, int> virtualKeyMap = new()
         {
             { "F1", 0x70 }, { "F2", 0x71 }, { "F3", 0x72 }, { "F4", 0x73 },
@@ -90,6 +111,11 @@ namespace Smookyz
             PostMessage(hWnd, WM_KEYDOWN, key, 0);
             PostMessage(hWnd, WM_KEYUP, key, 0);
             Thread.Sleep(delay);
+        }
+        static void PressKeyNoDl(IntPtr hWnd, int key)
+        {
+            PostMessage(hWnd, WM_KEYDOWN, key, 0);
+            PostMessage(hWnd, WM_KEYUP, key, 0);
         }
         static void PressHPKey(IntPtr hWnd, int key)
         {
@@ -140,6 +166,20 @@ namespace Smookyz
                 windowTitle=HoneyRO ~
                 baseAddress=010DCE10
                 autoBuffDelay=50
+            
+            [Skill Spammer]
+                mouseBoostAddress=
+                skillSpamKeys=
+                skillSpamDelay=1
+                holdKey=
+                holdKeyDelay=29
+
+            [SG Gypsy]
+                whipKey=
+                pdfmKey=
+                combatKnifeKey=
+                pdfmDelay=100
+                combatKnifeDelay=100
             """);
                 return;
             }
@@ -189,9 +229,73 @@ namespace Smookyz
                         config.autoBuffDelay = delayVal;
                     }
                 }
+                else if (section == "Skill Spammer")
+                {
+                    if (key == "mouseBoostAddress")
+                    {
+                        string cleanedVal = val.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? val.Substring(2) : val;
+
+                        if (int.TryParse(cleanedVal, System.Globalization.NumberStyles.HexNumber, null, out int hexAddr))
+                        {
+                            config.mouseBoostAddress = hexAddr;
+                        }
+                        else if (int.TryParse(val, out int decAddr)) // fallback in case it's pure decimal
+                        {
+                            config.mouseBoostAddress = decAddr;
+                        }
+                    }
+                    else if (key == "skillSpamKeys")
+                    {
+                        var keys = val.Split(',');
+                        foreach (var k in keys)
+                        {
+                            if (virtualKeyMap.TryGetValue(k.Trim(), out int keyCode))
+                                config.skillSpamKeys.Add(keyCode);
+                        }
+                    }
+                    else if (key == "skillSpamDelay" && int.TryParse(val, out int spamDelay))
+                    {
+                        config.skillSpamDelay = spamDelay;
+                    }
+                    else if (key == "holdKey")
+                    {
+                        if (string.IsNullOrWhiteSpace(val))
+                        {
+                            typeof(Config).GetField(key)?.SetValue(config, -1); // disabled
+                        }
+                        else if (virtualKeyMap.TryGetValue(val, out int code))
+                        {
+                            typeof(Config).GetField(key)?.SetValue(config, code);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Unknown key '{val}' for '{key}'");
+                            typeof(Config).GetField(key)?.SetValue(config, -1);
+                        }
+                    }
+                    else if (key == "holdKeyDelay" && int.TryParse(val, out int holdDelay))
+                    {
+                        config.holdKeyDelay = holdDelay;
+                    }
+                }
+                else if (section == "SG Gypsy")
+                {
+                    if (key is "whipKey" or "pdfmKey" or "combatKnifeKey")
+                    {
+                        if (string.IsNullOrWhiteSpace(val))
+                            typeof(Config).GetField(key)?.SetValue(config, -1);
+                        else if (virtualKeyMap.TryGetValue(val, out int code))
+                            typeof(Config).GetField(key)?.SetValue(config, code);
+                        else
+                            Console.WriteLine($"Unknown macro key '{val}' for '{key}'");
+                    }
+                    else if ((key == "pdfmDelay" || key == "combatKnifeDelay") && int.TryParse(val, out int delay))
+                    {
+                        typeof(Config).GetField(key)?.SetValue(config, delay);
+                    }
+                }
             }
         }
-
         static void ReadHpOnly(IntPtr hProcess, int addr, ref PlayerStatus status)
         {
             byte[] buffer = new byte[8];
@@ -199,7 +303,6 @@ namespace Smookyz
             status.hpValue = BitConverter.ToInt32(buffer, 0);
             status.hpMax = BitConverter.ToInt32(buffer, 4);
         }
-
         static void ReadSp(IntPtr hProcess, int spAddr, ref PlayerStatus status)
         {
             byte[] buffer = new byte[8];
@@ -207,7 +310,6 @@ namespace Smookyz
             status.spValue = BitConverter.ToInt32(buffer, 0);
             status.spMax = BitConverter.ToInt32(buffer, 4);
         }
-
         static void CheckBuffs(IntPtr hProcess, int addr, Buffs buffs)
         {
             int bufferSize = 33;
@@ -252,7 +354,7 @@ namespace Smookyz
                 }
             }
         }
-
+        static DateTime lastSpeedKeyTime = DateTime.MinValue;
         static void HandleActions(IntPtr hProcess, IntPtr hWnd, PlayerStatus status, Buffs buffs, double spThreshold, Config config, bool paused)
         {
             if (config.statusRecoveryKey != -1 && buffs.negativeStatus)
@@ -269,6 +371,15 @@ namespace Smookyz
             if (config.speedKey != -1 && !buffs.speed)
             {
                 PressKey(hWnd, config.speedKey, config.autoBuffDelay);
+                lastSpeedKeyTime = DateTime.Now;
+                return;
+            }
+            if (config.speedKey != -1 && ((DateTime.Now - lastSpeedKeyTime).TotalMilliseconds >= 3800))
+            {
+                Thread.Sleep(80);
+                PressKey(hWnd, config.speedKey, 15);
+                PressKey(hWnd, config.speedKey, 15);
+                lastSpeedKeyTime = DateTime.Now;
                 return;
             }
 
@@ -384,7 +495,120 @@ namespace Smookyz
                 PressHPKey(hWnd, config.hpKey);
             }
         }
+        static void WriteIntToMemory(IntPtr hProcess, int address, int value)
+        {
+            byte[] buffer = BitConverter.GetBytes(value);
+            WriteProcessMemory(hProcess, (IntPtr)address, buffer, buffer.Length, out _);
+        }
+        static void SkillSpammerThread(IntPtr hProcess, IntPtr hWnd, int address, int holdKey, int holdDelay, List<int> selectedKeys, int spamDelay)
+        {
+            bool initialSetupDone = false;
+            int activeKey = -1;
 
+            while (spammerRunning)
+            {
+                if (activeKey == -1)
+                {
+                    foreach (int key in selectedKeys)
+                    {
+                        if ((GetAsyncKeyState(key) & 0x8000) != 0)
+                        {
+                            activeKey = key;
+
+                            if (holdKey != -1 && !initialSetupDone)
+                            {
+                                PostMessage(hWnd, WM_KEYDOWN, holdKey, 0);
+                                Thread.Sleep(holdDelay);
+                                PostMessage(hWnd, WM_KEYUP, holdKey, 0);
+                                initialSetupDone = true;
+                            }
+
+                            break; // Found key, break early
+                        }
+                    }
+                }
+                else if ((GetAsyncKeyState(activeKey) & 0x8000) != 0)
+                {
+                    // Key is still held — spam it
+                    WriteIntToMemory(hProcess, address, 500);
+                    PostMessage(hWnd, WM_KEYDOWN, activeKey, 0);
+                    PostMessage(hWnd, 0x0201, 0x0001, 0); // WM_LBUTTONDOWN
+                    Thread.Sleep(spamDelay);
+                    PostMessage(hWnd, 0x0202, 0x0000, 0); // WM_LBUTTONUP
+                    Thread.Sleep(spamDelay);
+                }
+                else
+                {
+                    // Key released — cleanup
+                    if (initialSetupDone && holdKey != -1)
+                    {
+                        SendMessage(hWnd, WM_KEYDOWN, holdKey, 0);
+                        Thread.Sleep(holdDelay);
+                        SendMessage(hWnd, WM_KEYUP, holdKey, 0);
+                        initialSetupDone = false;
+                    }
+
+                    activeKey = -1;
+                }
+
+                Thread.Sleep(14); 
+            }
+        }
+        static void StartSpammerThread(IntPtr hProcess, IntPtr hWnd, Config config)
+        {
+            var thread = new Thread(() =>
+            {
+                SkillSpammerThread(
+                                    hProcess,
+                                    hWnd,
+                                    config.mouseBoostAddress,
+                                    config.holdKey,
+                                    config.holdKeyDelay,
+                                    new List<int>(config.skillSpamKeys),
+                                    config.skillSpamDelay
+                );
+            })
+            {
+                IsBackground = true
+            };
+            thread.Start();
+        }
+        static void MacroSwitcherThread(IntPtr hWnd, int whipKey, int pdfmKey, int combatKnifeKey, int pdfmDelay, int combatKnifeDelay)
+        {
+            while (true)
+            {
+                if ((GetAsyncKeyState(whipKey) & 0x8000) != 0) 
+                {
+                    PressKey(hWnd, whipKey, 14); 
+                    PressKeyNoDl(hWnd, pdfmKey);
+                    Thread.Sleep(pdfmDelay);
+                    PressKeyNoDl(hWnd, combatKnifeKey);
+                    Thread.Sleep(combatKnifeDelay);              
+                }
+
+                Thread.Sleep(15);
+            }
+        }
+        static void StartMacroSwitcherThread(IntPtr hWnd, Config config)
+        {
+
+            var thread = new Thread(() =>
+            {
+                MacroSwitcherThread(
+                                    hWnd,
+                                    config.whipKey,
+                                    config.pdfmKey,
+                                    config.combatKnifeKey,
+                                    config.pdfmDelay,
+                                    config.combatKnifeDelay
+                );
+            })
+            {
+                IsBackground = true
+            };
+            thread.Start();
+            
+        }
         static void Main()
         {
             Console.Title = "Smookyz";
@@ -418,14 +642,27 @@ namespace Smookyz
             int buffAddr = baseAddr + 0x474;
 
             bool paused = false;
+
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Server Found!\nSmookyz [ON]");
             Console.ResetColor();
+
+            if (config.skillSpamKeys.Count > 0)
+            {
+                spammerRunning = true;
+                StartSpammerThread(hProcess, hWnd, config);
+            }
+
+            if (config.whipKey != -1 && config.pdfmKey != -1 && config.combatKnifeKey != -1) { 
+                StartMacroSwitcherThread(hWnd, config);
+            }
+
             PlayerStatus status = new();
             Buffs buffs = new();
             int counter = 0;
             int debounceDelayMs = 600;
             DateTime lastPauseToggle = DateTime.MinValue;
+
             while (true)
             {
                 // Pause toggle key detection (toggle paused on key press)
