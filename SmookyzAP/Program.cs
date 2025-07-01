@@ -526,6 +526,9 @@ namespace Smookyz
                             break; // Found key, break early
                         }
                     }
+
+                    // Only sleep while idle (no key active)
+                    Thread.Sleep(14);
                 }
                 else if ((GetAsyncKeyState(activeKey) & 0x8000) != 0)
                 {
@@ -550,8 +553,6 @@ namespace Smookyz
 
                     activeKey = -1;
                 }
-
-                Thread.Sleep(14); 
             }
         }
         static void StartSpammerThread(IntPtr hProcess, IntPtr hWnd, Config config)
