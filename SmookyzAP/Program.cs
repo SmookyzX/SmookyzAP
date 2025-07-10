@@ -598,7 +598,7 @@ namespace Smookyz
             }
 
             // If none of the above, Use HP pots instead :)
-            if (HighPingMode) 
+            if (HighPingMode)
             {
                 PressHPKey(hWnd, config.hpKey);
             }
@@ -659,7 +659,7 @@ namespace Smookyz
                     {
                         PostMessage(hWnd, 0x0201, 0x0001, 0);
                         Thread.Sleep(spamDelay);
-                        PostMessage(hWnd, 0x0202, 0x0000, 0); 
+                        PostMessage(hWnd, 0x0202, 0x0000, 0);
                     }
 
                     Thread.Sleep(spamDelay);
@@ -678,7 +678,7 @@ namespace Smookyz
                         PostMessage(hWnd, WM_KEYUP, activeKey, 0);
                         activeKey = -1;
                     }
-                    
+
                 }
             }
         }
@@ -746,12 +746,10 @@ namespace Smookyz
                 {
                     foreach (var (key, delay) in sequence)
                     {
-                        PostMessage(hWnd, WM_KEYDOWN, key, 0);
-                        PostMessage(hWnd, WM_KEYUP, key, 0);
-                        Thread.Sleep(delay);
+                        PressKey(hWnd, key, delay);
                     }
 
-                    while ((GetAsyncKeyState(triggerKey) & 0x8000) != 0) Thread.Sleep(30); 
+                    while ((GetAsyncKeyState(triggerKey) & 0x8000) != 0) Thread.Sleep(30);
                 }
 
                 Thread.Sleep(15);
