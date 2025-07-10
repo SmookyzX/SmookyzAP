@@ -601,6 +601,7 @@ namespace Smookyz
             if (HighPingMode)
             {
                 PressHPKey(hWnd, config.hpKey);
+                Thread.Sleep(15);
             }
         }
         static void WriteIntToMemory(IntPtr hProcess, int address, int value)
