@@ -79,13 +79,6 @@ On first run, a `config.ini` file will be created. Edit this file to set hotkeys
 
 ---
 
-## Safety & Warnings
-
-- **Use at your own risk!** This tool interacts with game memory and simulates input, which may violate game rules and result in bans.
-- **Only use on servers where you have explicit permission.**
-
----
-
 ## Credits
 
 Created by [SmookyzX](https://github.com/SmookyzX)
