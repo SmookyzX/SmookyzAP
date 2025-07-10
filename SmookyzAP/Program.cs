@@ -62,12 +62,13 @@ namespace Smookyz
             // Adjustable SP threshold (percentage)
             public double spThreshold = -1;
 
-            public int pauseKey = 0x24;
+            public int HighPingModeToggle = 0x24;
             public string windowTitle = "HoneyRO ~";
             public int baseAddress = 0x010DCE10;
             public int autoBuffDelay = 50;
 
-            public List<int> skillSpamKeys = new();
+            public List<int> skillSpamClickKeys = new();
+            public List<int> skillSpamNoClickKeys = new();
             public int skillSpamDelay = 1;
             public int mouseBoostAddress = -1;
             public int holdKey = -1;
@@ -78,6 +79,15 @@ namespace Smookyz
             public int combatKnifeKey = -1;
             public int pdfmDelay = 100;
             public int combatKnifeDelay = 100;
+
+            public int periodicKey = -1;
+            public int periodicDelay = -1; // milliseconds (default 10s)
+
+            public int fullPauseKey = 0x23;
+
+            public bool chainMacroEnabled = false;
+            public int chainMacroKey = -1;
+            public List<(int key, int delay)> chainMacroSequence = new();
         }
         static readonly Dictionary<string, int> virtualKeyMap = new()
         {
@@ -101,7 +111,32 @@ namespace Smookyz
             { "p", 0x50 }, { "q", 0x51 }, { "r", 0x52 }, { "s", 0x53 }, { "t", 0x54 },
             { "u", 0x55 }, { "v", 0x56 }, { "w", 0x57 }, { "x", 0x58 }, { "y", 0x59 }, { "z", 0x5A },
 
-            { "HOME", 0x24 }
+            // Control keys
+            { "BACKSPACE", 0x08 },
+            { "TAB", 0x09 },
+            { "ENTER", 0x0D },
+            { "SHIFT", 0x10 },
+            { "CTRL", 0x11 },
+            { "ALT", 0x12 },
+            { "CAPSLOCK", 0x14 },
+            { "ESCAPE", 0x1B },
+
+            // Space and punctuation
+            { "SPACE", 0x20 },
+            { "PAGEUP", 0x21 },
+            { "PAGEDOWN", 0x22 },
+            { "END", 0x23 },
+            { "HOME", 0x24 },
+            { "LEFT", 0x25 },
+            { "UP", 0x26 },
+            { "RIGHT", 0x27 },
+            { "DOWN", 0x28 },
+            { "INSERT", 0x2D },
+            { "DELETE", 0x2E },
+
+            // Number pad keys
+            { "NUM0", 0x60 }, { "NUM1", 0x61 }, { "NUM2", 0x62 }, { "NUM3", 0x63 }, { "NUM4", 0x64 },
+            { "NUM5", 0x65 }, { "NUM6", 0x66 }, { "NUM7", 0x67 }, { "NUM8", 0x68 }, { "NUM9", 0x69 },
         };
 
         static double Percent(double val1, double val2) => (val2 == 0) ? 0 : (val1 / val2) * 100.0;
@@ -134,52 +169,69 @@ namespace Smookyz
             {
                 File.WriteAllText(file, """
             [Hotkeys]
-                hpKey=
-                spKey=
-                statusRecoveryKey=
-                pauseKey=HOME
+                hpKey = 
+                spKey = 
+                statusRecoveryKey = 
 
-                aspdKey=
-                gloomKey=
-                sunKey=
-                fireKey=
-                waterKey=
-                windKey=
-                strKey=
-                dexKey=
-                agiKey=
-                vitKey=
-                lukKey=
-                intelKey=
-                resentmentKey=
-                drowsinessKey=
-                speedKey=
-                gloriaKey=
-                truesightKey=
-                abrasiveKey=
-                autoguardKey=
-                reflectshieldKey=
-                defenderKey=
+            ; High Ping Mode which toggles the constant potting is now DEFAULT OFF
+                HighPingModeToggle = HOME
+
+            ; The fullpausekey only pauses the potter/autobuff. It does not pause the clicker. Just to save some woe mats
+                fullPauseKey = END
+
+            ; AutoBuffs
+                aspdKey = 
+                gloomKey = 
+                sunKey = 
+                fireKey = 
+                waterKey = 
+                windKey = 
+                strKey = 
+                dexKey = 
+                agiKey = 
+                vitKey = 
+                lukKey = 
+                intelKey = 
+                resentmentKey = 
+                drowsinessKey = 
+                speedKey = 
+                gloriaKey = 
+                truesightKey = 
+                abrasiveKey = 
+                autoguardKey = 
+                reflectshieldKey = 
+                defenderKey = 
 
             [Settings]
-                spThreshold=
-                windowTitle=HoneyRO ~
-                baseAddress=010DCE10
-                autoBuffDelay=50
-            
+                spThreshold = 
+                windowTitle = HoneyRO ~
+                baseAddress = 010DCE10
+                autoBuffDelay = 50
+
             [Skill Spammer]
-                mouseBoostAddress=
-                skillSpamKeys=
-                skillSpamDelay=1
-                holdKey=
-                holdKeyDelay=29
+                mouseBoostAddress = 
+                skillSpamClickKeys = 
+                skillSpamNoClickKeys = 
+                skillSpamDelay = 1
+                holdKey = 
+                holdKeyDelay = 29
 
             [SG Gypsy]
-                whipKey=
-                pdfmKey=
-                combatKnifeKey=
-                pdfmDelay=100
-                combatKnifeDelay=100
+                whipKey = 
+                pdfmKey = 
+                combatKnifeKey = 
+                pdfmDelay = 100
+                combatKnifeDelay = 100
+
+            ; Periodic Key = Send x key every x milliseconds. Used for autogloria etc... DOES NOT WORK PROPERLY IF HIGH PING MODE IS ON
+            [Periodic Key]
+                periodicKey = 
+                periodicDelay = 
+
+            [Chain Macro]
+                chainMacroEnabled = false
+                chainMacroKey = 
+                chainMacroSequence = F1:1000,F2:500,F3:1500
             """);
                 return;
             }
@@ -244,13 +296,22 @@ namespace Smookyz
                             config.mouseBoostAddress = decAddr;
                         }
                     }
-                    else if (key == "skillSpamKeys")
+                    else if (key == "skillSpamClickKeys")
                     {
                         var keys = val.Split(',');
                         foreach (var k in keys)
                         {
                             if (virtualKeyMap.TryGetValue(k.Trim(), out int keyCode))
-                                config.skillSpamKeys.Add(keyCode);
+                                config.skillSpamClickKeys.Add(keyCode);
+                        }
+                    }
+                    else if (key == "skillSpamNoClickKeys")
+                    {
+                        var keys = val.Split(',');
+                        foreach (var k in keys)
+                        {
+                            if (virtualKeyMap.TryGetValue(k.Trim(), out int keyCode))
+                                config.skillSpamNoClickKeys.Add(keyCode);
                         }
                     }
                     else if (key == "skillSpamDelay" && int.TryParse(val, out int spamDelay))
@@ -292,6 +353,44 @@ namespace Smookyz
                     else if ((key == "pdfmDelay" || key == "combatKnifeDelay") && int.TryParse(val, out int delay))
                     {
                         typeof(Config).GetField(key)?.SetValue(config, delay);
+                    }
+                }
+                else if (section == "Periodic Key")
+                {
+                    if (key == "periodicKey")
+                    {
+                        if (string.IsNullOrWhiteSpace(val))
+                            config.periodicKey = -1;
+                        else if (virtualKeyMap.TryGetValue(val, out int code))
+                            config.periodicKey = code;
+                        else
+                            Console.WriteLine($"Unknown periodic key '{val}'");
+                    }
+                    else if (key == "periodicDelay" && int.TryParse(val, out int pd))
+                    {
+                        config.periodicDelay = pd;
+                    }
+                }
+                else if (section == "Chain Macro")
+                {
+                    if (key == "chainMacroEnabled" && bool.TryParse(val, out bool enabled))
+                        config.chainMacroEnabled = enabled;
+                    else if (key == "chainMacroKey" && virtualKeyMap.TryGetValue(val, out int triggerKey))
+                        config.chainMacroKey = triggerKey;
+                    else if (key == "chainMacroSequence")
+                    {
+                        var entries = val.Split(',');
+                        foreach (var entry in entries)
+                        {
+                            var entryParts = entry.Split(':');
+                            if (entryParts.Length != 2) continue;
+
+                            if (virtualKeyMap.TryGetValue(entryParts[0].Trim(), out int k) &&
+                                int.TryParse(entryParts[1].Trim(), out int d))
+                            {
+                                config.chainMacroSequence.Add((k, d));
+                            }
+                        }
                     }
                 }
             }
@@ -354,32 +453,33 @@ namespace Smookyz
                 }
             }
         }
-        static DateTime lastSpeedKeyTime = DateTime.MinValue;
-        static void HandleActions(IntPtr hProcess, IntPtr hWnd, PlayerStatus status, Buffs buffs, double spThreshold, Config config, bool paused)
+        static DateTime nextSpeedKeyTime = DateTime.MinValue;
+        static DateTime nextPeriodicKeyTime = DateTime.MinValue;
+        static void HandleActions(IntPtr hProcess, IntPtr hWnd, PlayerStatus status, Buffs buffs, double spThreshold, Config config, bool HighPingMode)
         {
             if (config.statusRecoveryKey != -1 && buffs.negativeStatus)
             {
-                PressKey(hWnd, config.statusRecoveryKey, 15);
+                PressKeyNoDl(hWnd, config.statusRecoveryKey);
                 return;
             }
 
             if (config.spKey != -1 && Percent(status.spValue, status.spMax) < config.spThreshold)
             {
-                PressKey(hWnd, config.spKey, 15);
+                PressSPKey(hWnd, config.spKey);
                 return;
             }
             if (config.speedKey != -1 && !buffs.speed)
             {
                 PressKey(hWnd, config.speedKey, config.autoBuffDelay);
-                lastSpeedKeyTime = DateTime.Now;
+                nextSpeedKeyTime = DateTime.Now.AddMilliseconds(3800);
                 return;
             }
-            if (config.speedKey != -1 && ((DateTime.Now - lastSpeedKeyTime).TotalMilliseconds >= 3800))
+            if (config.speedKey != -1 && DateTime.Now >= nextSpeedKeyTime)
             {
                 Thread.Sleep(80);
                 PressKey(hWnd, config.speedKey, 15);
                 PressKey(hWnd, config.speedKey, 15);
-                lastSpeedKeyTime = DateTime.Now;
+                nextSpeedKeyTime = DateTime.Now.AddMilliseconds(3800);
                 return;
             }
 
@@ -488,9 +588,17 @@ namespace Smookyz
                 PressKey(hWnd, config.defenderKey, config.autoBuffDelay);
                 return;
             }
+            if (config.periodicKey != -1 && DateTime.Now >= nextPeriodicKeyTime)
+            {
+                PressKey(hWnd, config.periodicKey, config.autoBuffDelay);
+                nextPeriodicKeyTime = nextPeriodicKeyTime == DateTime.MinValue
+                    ? DateTime.Now.AddMilliseconds(config.periodicDelay)
+                    : nextPeriodicKeyTime.AddMilliseconds(config.periodicDelay);
+                return;
+            }
 
             // If none of the above, Use HP pots instead :)
-            if (!paused)  // <-- only press HP key if NOT paused | Pause check is inside Main
+            if (HighPingMode) 
             {
                 PressHPKey(hWnd, config.hpKey);
             }
@@ -500,49 +608,64 @@ namespace Smookyz
             byte[] buffer = BitConverter.GetBytes(value);
             WriteProcessMemory(hProcess, (IntPtr)address, buffer, buffer.Length, out _);
         }
-        static void SkillSpammerThread(IntPtr hProcess, IntPtr hWnd, int address, int holdKey, int holdDelay, List<int> selectedKeys, int spamDelay)
+        static void SkillSpammerUnifiedThread(IntPtr hProcess, IntPtr hWnd, int address, int holdKey, int holdDelay, List<int> clickKeys, List<int> noClickKeys, int spamDelay)
         {
             bool initialSetupDone = false;
             int activeKey = -1;
+            bool activeKeyIsClick = false;
 
             while (spammerRunning)
             {
                 if (activeKey == -1)
                 {
-                    foreach (int key in selectedKeys)
+                    foreach (int key in clickKeys)
                     {
                         if ((GetAsyncKeyState(key) & 0x8000) != 0)
                         {
                             activeKey = key;
-
-                            if (holdKey != -1 && !initialSetupDone)
+                            activeKeyIsClick = true;
+                            break;
+                        }
+                    }
+                    if (activeKey == -1)
+                    {
+                        foreach (int key in noClickKeys)
+                        {
+                            if ((GetAsyncKeyState(key) & 0x8000) != 0)
                             {
-                                PostMessage(hWnd, WM_KEYDOWN, holdKey, 0);
-                                Thread.Sleep(holdDelay);
-                                PostMessage(hWnd, WM_KEYUP, holdKey, 0);
-                                initialSetupDone = true;
+                                activeKey = key;
+                                activeKeyIsClick = false;
+                                break;
                             }
-
-                            break; // Found key, break early
                         }
                     }
 
-                    // Only sleep while idle (no key active)
+                    if (activeKey != -1 && holdKey != -1 && !initialSetupDone)
+                    {
+                        PostMessage(hWnd, WM_KEYDOWN, holdKey, 0);
+                        Thread.Sleep(holdDelay);
+                        PostMessage(hWnd, WM_KEYUP, holdKey, 0);
+                        initialSetupDone = true;
+                    }
+
                     Thread.Sleep(14);
                 }
                 else if ((GetAsyncKeyState(activeKey) & 0x8000) != 0)
                 {
-                    // Key is still held — spam it
                     WriteIntToMemory(hProcess, address, 500);
                     PostMessage(hWnd, WM_KEYDOWN, activeKey, 0);
-                    PostMessage(hWnd, 0x0201, 0x0001, 0); // WM_LBUTTONDOWN
-                    Thread.Sleep(spamDelay);
-                    PostMessage(hWnd, 0x0202, 0x0000, 0); // WM_LBUTTONUP
+
+                    if (activeKeyIsClick)
+                    {
+                        PostMessage(hWnd, 0x0201, 0x0001, 0);
+                        Thread.Sleep(spamDelay);
+                        PostMessage(hWnd, 0x0202, 0x0000, 0); 
+                    }
+
                     Thread.Sleep(spamDelay);
                 }
                 else
                 {
-                    // Key released — cleanup
                     if (initialSetupDone && holdKey != -1)
                     {
                         SendMessage(hWnd, WM_KEYDOWN, holdKey, 0);
@@ -550,41 +673,47 @@ namespace Smookyz
                         SendMessage(hWnd, WM_KEYUP, holdKey, 0);
                         initialSetupDone = false;
                     }
-
-                    activeKey = -1;
+                    if (activeKey != -1)
+                    {
+                        PostMessage(hWnd, WM_KEYUP, activeKey, 0);
+                        activeKey = -1;
+                    }
+                    
                 }
             }
         }
-        static void StartSpammerThread(IntPtr hProcess, IntPtr hWnd, Config config)
+        static void StartUnifiedSpammerThread(IntPtr hProcess, IntPtr hWnd, Config config)
         {
             var thread = new Thread(() =>
             {
-                SkillSpammerThread(
-                                    hProcess,
-                                    hWnd,
-                                    config.mouseBoostAddress,
-                                    config.holdKey,
-                                    config.holdKeyDelay,
-                                    new List<int>(config.skillSpamKeys),
-                                    config.skillSpamDelay
+                SkillSpammerUnifiedThread(
+                    hProcess,
+                    hWnd,
+                    config.mouseBoostAddress,
+                    config.holdKey,
+                    config.holdKeyDelay,
+                    new List<int>(config.skillSpamClickKeys),
+                    new List<int>(config.skillSpamNoClickKeys),
+                    config.skillSpamDelay
                 );
             })
             {
                 IsBackground = true
             };
+
             thread.Start();
         }
         static void MacroSwitcherThread(IntPtr hWnd, int whipKey, int pdfmKey, int combatKnifeKey, int pdfmDelay, int combatKnifeDelay)
         {
             while (true)
             {
-                if ((GetAsyncKeyState(whipKey) & 0x8000) != 0) 
+                if ((GetAsyncKeyState(whipKey) & 0x8000) != 0)
                 {
-                    PressKey(hWnd, whipKey, 14); 
+                    PressKey(hWnd, whipKey, 14);
                     PressKeyNoDl(hWnd, pdfmKey);
                     Thread.Sleep(pdfmDelay);
                     PressKeyNoDl(hWnd, combatKnifeKey);
-                    Thread.Sleep(combatKnifeDelay);              
+                    Thread.Sleep(combatKnifeDelay);
                 }
 
                 Thread.Sleep(15);
@@ -592,23 +721,48 @@ namespace Smookyz
         }
         static void StartMacroSwitcherThread(IntPtr hWnd, Config config)
         {
-
             var thread = new Thread(() =>
             {
                 MacroSwitcherThread(
-                                    hWnd,
-                                    config.whipKey,
-                                    config.pdfmKey,
-                                    config.combatKnifeKey,
-                                    config.pdfmDelay,
-                                    config.combatKnifeDelay
+                    hWnd,
+                    config.whipKey,
+                    config.pdfmKey,
+                    config.combatKnifeKey,
+                    config.pdfmDelay,
+                    config.combatKnifeDelay
                 );
             })
             {
                 IsBackground = true
             };
+
             thread.Start();
-            
+        }
+        static void ChainMacroThread(IntPtr hWnd, int triggerKey, List<(int key, int delay)> sequence)
+        {
+            while (true)
+            {
+                if ((GetAsyncKeyState(triggerKey) & 0x8000) != 0)
+                {
+                    foreach (var (key, delay) in sequence)
+                    {
+                        PostMessage(hWnd, WM_KEYDOWN, key, 0);
+                        PostMessage(hWnd, WM_KEYUP, key, 0);
+                        Thread.Sleep(delay);
+                    }
+
+                    while ((GetAsyncKeyState(triggerKey) & 0x8000) != 0) Thread.Sleep(30); 
+                }
+
+                Thread.Sleep(15);
+            }
+        }
+        static void StartChainMacroThread(IntPtr hWnd, Config config)
+        {
+            new Thread(() => ChainMacroThread(hWnd, config.chainMacroKey, config.chainMacroSequence))
+            {
+                IsBackground = true
+            }.Start();
         }
         static void Main()
         {
@@ -642,39 +796,90 @@ namespace Smookyz
             int spAddr = baseAddr + 8;
             int buffAddr = baseAddr + 0x474;
 
-            bool paused = false;
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Server Found!\nSmookyz [ON]");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("Server Found!\nSmookyz [ON]\nHave A Blessed Day <3\n");
             Console.ResetColor();
 
-            if (config.skillSpamKeys.Count > 0)
+            // Reserve lines for status display
+            Console.WriteLine(); // Line for pause status
+            Console.WriteLine(); // Line for high ping mode status
+            int statusTopLine = Console.CursorTop - 2;
+
+            if (config.skillSpamClickKeys.Count > 0 || config.skillSpamNoClickKeys.Count > 0)
             {
                 spammerRunning = true;
-                StartSpammerThread(hProcess, hWnd, config);
+                StartUnifiedSpammerThread(hProcess, hWnd, config);
             }
 
-            if (config.whipKey != -1 && config.pdfmKey != -1 && config.combatKnifeKey != -1) { 
+            if (config.whipKey != -1 && config.pdfmKey != -1 && config.combatKnifeKey != -1)
+            {
                 StartMacroSwitcherThread(hWnd, config);
+            }
+            if (config.chainMacroEnabled && config.chainMacroSequence.Count > 0 && config.chainMacroKey != -1)
+            {
+                StartChainMacroThread(hWnd, config);
             }
 
             PlayerStatus status = new();
             Buffs buffs = new();
+
+            bool HighPingMode = false;
+            bool lastHighPingState = false;
+
+            bool isPaused = false;
+            bool lastPausedState = false;
+
             int counter = 0;
             int debounceDelayMs = 600;
+            DateTime lastHighPingModeToggle = DateTime.MinValue;
+
+            int pauseKey = config.fullPauseKey;
+            int debounceMs = 600;
             DateTime lastPauseToggle = DateTime.MinValue;
 
             while (true)
             {
-                // Pause toggle key detection (toggle paused on key press)
-                if ((GetAsyncKeyState(config.pauseKey) & 0x8000) != 0)
+                // Pause toggle
+                if (pauseKey != -1 && (GetAsyncKeyState(pauseKey) & 0x8000) != 0)
                 {
-                    if ((DateTime.Now - lastPauseToggle).TotalMilliseconds > debounceDelayMs)
+                    if ((DateTime.Now - lastPauseToggle).TotalMilliseconds > debounceMs)
                     {
-                        paused = !paused;
-                        Console.WriteLine(paused ? "Paused" : "Resumed");
+                        isPaused = !isPaused;
+                        Console.Beep(400, 300);
                         lastPauseToggle = DateTime.Now;
                     }
+                }
+
+                // High Ping toggle (allowed during pause or not paused)
+                if ((GetAsyncKeyState(config.HighPingModeToggle) & 0x8000) != 0)
+                {
+                    if ((DateTime.Now - lastHighPingModeToggle).TotalMilliseconds > debounceDelayMs)
+                    {
+                        HighPingMode = !HighPingMode;
+                        lastHighPingModeToggle = DateTime.Now;
+                    }
+                }
+
+                // Update Toggle Status
+                if (lastPausedState != isPaused || lastHighPingState != HighPingMode)
+                {
+                    Console.SetCursorPosition(0, statusTopLine);
+                    Console.ForegroundColor = isPaused ? ConsoleColor.Red : ConsoleColor.Green;
+                    Console.Write("SmookyzAP: " + (isPaused ? "OFF " : "ON ") + "   "); // clear old text
+
+                    Console.SetCursorPosition(0, statusTopLine + 1);
+                    Console.ForegroundColor = HighPingMode ? ConsoleColor.DarkGreen : ConsoleColor.Yellow;
+                    Console.Write("High Ping Mode: " + (HighPingMode ? "ON " : "OFF ") + "   ");
+
+                    Console.ResetColor();
+                    lastPausedState = isPaused;
+                    lastHighPingState = HighPingMode;
+                }
+
+                if (isPaused)
+                {
+                    Thread.Sleep(20);
+                    continue;
                 }
 
                 ReadHpOnly(hProcess, hpAddr, ref status);
@@ -699,9 +904,9 @@ namespace Smookyz
                 ReadSp(hProcess, spAddr, ref status);
                 buffs = new Buffs();
                 CheckBuffs(hProcess, buffAddr, buffs);
-                HandleActions(hProcess, hWnd, status, buffs, config.spThreshold, config, paused);
+                HandleActions(hProcess, hWnd, status, buffs, config.spThreshold, config, HighPingMode);
 
-                Thread.Sleep(15);
+                Thread.Sleep(14);
             }
         }
 

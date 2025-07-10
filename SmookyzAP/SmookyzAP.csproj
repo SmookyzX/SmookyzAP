@@ -7,11 +7,20 @@
     <Nullable>enable</Nullable>
 
     <!-- Build configuration -->
-    <Optimize>true</Optimize>               <!-- Optimize for Release -->
-    <DebugType>None</DebugType>             <!-- No PDB generation -->
-    <DebugSymbols>false</DebugSymbols>      <!-- Don't generate debug symbols -->
-    <Deterministic>true</Deterministic>     <!-- Deterministic builds -->
+    <Optimize>true</Optimize>
+    <DebugType>None</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Deterministic>true</Deterministic>
+	<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+	<TieredCompilation>true</TieredCompilation>
 
+    <!-- Licensing and project metadata -->
+    <Authors>SmookyzX</Authors> 
+    <Company>SmookyzX</Company> 
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/SmookyzX/SmookyzAP</RepositoryUrl> 
+    <RepositoryType>git</RepositoryType>
+    <Copyright>© 2025 SmookyzX</Copyright>
   </PropertyGroup>
 
 </Project>
