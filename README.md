@@ -16,6 +16,7 @@ I put all the code into the program.cs file to make it easier for newer or begin
 Explanation -> https://www.youtube.com/watch?v=P06RzfgapOg
 
 SmookyzAP in action -> https://www.youtube.com/watch?v=ecfqVSuzZu8
+350 ping guild dominating -> https://www.youtube.com/watch?v=ful58PGnanU
 
 ---
 
