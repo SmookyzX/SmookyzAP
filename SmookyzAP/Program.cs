@@ -759,10 +759,19 @@ namespace Smookyz
         }
         static void StartChainMacroThread(IntPtr hWnd, Config config)
         {
-            new Thread(() => ChainMacroThread(hWnd, config.chainMacroKey, config.chainMacroSequence))
+            var thread = new Thread(() =>
+            {
+                ChainMacroThread(
+                    hWnd,
+                    config.chainMacroKey,
+                    new List<(int key, int delay)>(config.chainMacroSequence)
+                );
+            })
             {
                 IsBackground = true
-            }.Start();
+            };
+
+            thread.Start();
         }
         static void Main()
         {
