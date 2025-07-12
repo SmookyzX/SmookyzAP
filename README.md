@@ -71,7 +71,7 @@ On first run, a `config.ini` file will be created. Edit this file to set hotkeys
 
 ---
 
-##Skill Spammer Key Format (New!)
+## Skill Spammer Key Format (New!)
 
 You can now specify whether each skill key should use the configured HoldKey for autohold.
 
