@@ -1,0 +1,32 @@
+[Changelog] v1.55
+
+You can now specify whether each skill spam key uses the configured HoldKey or not.
+
+Previously, all skill spam keys automatically used the HoldKey if it was set.
+
+Now, you control this behavior per key by adding :false after each key in the config.
+
+Example:
+skillSpamClickKeys = F1,F2:false means
+
+F1 will use HoldKey (default = true)
+
+F2 will not use HoldKey
+
+If you omit the :false suffix, keys default to using HoldKey (true) if the holdkey is set.
+
+[Changelog] v1.4
+
+*Added New Skill spammer with no click
+
+*Updated Clicker - Removed unnecessary lines slightly reducing overhead
+
+*Added Chain Macro (No Click) - Can set as many Keys + Delays as the user wants - Only triggers once per keypress
+
+*Added new pause functionality - The pause now pauses the Autopotter
+
+*Changed the old pause to "HighPingMode" as it better describes the algorithm
+
+*Updated Global Thread timer to make the AP a couple more ms responsive
+
+*Added periodicKey - Used for autogloria etc
