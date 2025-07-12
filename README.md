@@ -71,6 +71,24 @@ On first run, a `config.ini` file will be created. Edit this file to set hotkeys
 
 ---
 
+##Skill Spammer Key Format (New!)
+
+You can now specify whether each skill key should use the configured HoldKey for autohold.
+
+Format:
+
+skillSpamClickKeys = F1,F2:false,F3
+skillSpamNoClickKeys = F4:false,F5
+
+Keys default to using HoldKey unless explicitly set to false.
+
+F1 and F3 will use HoldKey.
+
+F2 and F4 will not use HoldKey.
+
+This allows more control over skills that do or don’t require autohold
+
+---
 ## Hotkeys & Controls
 
 - **Pause/Resume:** `END` (default) – toggles autopot features on/off.
