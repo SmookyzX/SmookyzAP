@@ -41,7 +41,17 @@ namespace Smookyz
         {
             public int hpValue, hpMax, spValue, spMax;
         }
+        public struct SpamKey
+        {
+            public int KeyCode;
+            public bool UseHold;
 
+            public SpamKey(int keyCode, bool useHold)
+            {
+                KeyCode = keyCode;
+                UseHold = useHold;
+            }
+        }
         class Buffs
         {
             public bool aspd, gloom, quag, sun, fire, water, wind,
@@ -67,8 +77,8 @@ namespace Smookyz
             public int baseAddress = 0x010DCE10;
             public int autoBuffDelay = 50;
 
-            public List<int> skillSpamClickKeys = new();
-            public List<int> skillSpamNoClickKeys = new();
+            public List<SpamKey> skillSpamClickKeys = new();
+            public List<SpamKey> skillSpamNoClickKeys = new();
             public int skillSpamDelay = 1;
             public int mouseBoostAddress = -1;
             public int holdKey = -1;
@@ -210,8 +220,8 @@ namespace Smookyz
 
             [Skill Spammer]
                 mouseBoostAddress = 
-                skillSpamClickKeys = 
-                skillSpamNoClickKeys = 
+                skillSpamClickKeys = F1,F2:false
+                skillSpamNoClickKeys = F3,F4:false
                 skillSpamDelay = 1
                 holdKey = 
                 holdKeyDelay = 29
@@ -301,8 +311,12 @@ namespace Smookyz
                         var keys = val.Split(',');
                         foreach (var k in keys)
                         {
-                            if (virtualKeyMap.TryGetValue(k.Trim(), out int keyCode))
-                                config.skillSpamClickKeys.Add(keyCode);
+                            var keyParts = k.Split(':');  
+                            var keyName = keyParts[0].Trim();
+                            bool useHold = keyParts.Length > 1 ? bool.TryParse(keyParts[1], out bool b) && b : true;
+
+                            if (virtualKeyMap.TryGetValue(keyName, out int keyCode))
+                                config.skillSpamClickKeys.Add(new SpamKey(keyCode, useHold));
                         }
                     }
                     else if (key == "skillSpamNoClickKeys")
@@ -310,8 +324,12 @@ namespace Smookyz
                         var keys = val.Split(',');
                         foreach (var k in keys)
                         {
-                            if (virtualKeyMap.TryGetValue(k.Trim(), out int keyCode))
-                                config.skillSpamNoClickKeys.Add(keyCode);
+                            var keyParts = k.Split(':');  
+                            var keyName = keyParts[0].Trim();
+                            bool useHold = keyParts.Length > 1 ? bool.TryParse(keyParts[1], out bool b) && b : true;
+
+                            if (virtualKeyMap.TryGetValue(keyName, out int keyCode))
+                                config.skillSpamNoClickKeys.Add(new SpamKey(keyCode, useHold));
                         }
                     }
                     else if (key == "skillSpamDelay" && int.TryParse(val, out int spamDelay))
@@ -609,54 +627,57 @@ namespace Smookyz
             byte[] buffer = BitConverter.GetBytes(value);
             WriteProcessMemory(hProcess, (IntPtr)address, buffer, buffer.Length, out _);
         }
-        static void SkillSpammerUnifiedThread(IntPtr hProcess, IntPtr hWnd, int address, int holdKey, int holdDelay, List<int> clickKeys, List<int> noClickKeys, int spamDelay)
+        static bool FindActiveSpamKey(List<SpamKey> keys, out int keyCode, out bool useHold)
         {
-            bool initialSetupDone = false;
+            foreach (var spamKey in keys)
+            {
+                if ((GetAsyncKeyState(spamKey.KeyCode) & 0x8000) != 0)
+                {
+                    keyCode = spamKey.KeyCode;
+                    useHold = spamKey.UseHold;
+                    return true;
+                }
+            }
+
+            keyCode = -1;
+            useHold = false;
+            return false;
+        }
+        static void SkillSpammerUnifiedThread(IntPtr hProcess, IntPtr hWnd, int address, int holdKey, int holdDelay, List<SpamKey> clickKeys, List<SpamKey> noClickKeys, int spamDelay)
+        {
+            bool holdActive = false;
             int activeKey = -1;
-            bool activeKeyIsClick = false;
+            bool isClickKey = false;
+            bool useHold = false;
 
             while (spammerRunning)
             {
                 if (activeKey == -1)
                 {
-                    foreach (int key in clickKeys)
-                    {
-                        if ((GetAsyncKeyState(key) & 0x8000) != 0)
-                        {
-                            activeKey = key;
-                            activeKeyIsClick = true;
-                            break;
-                        }
-                    }
-                    if (activeKey == -1)
-                    {
-                        foreach (int key in noClickKeys)
-                        {
-                            if ((GetAsyncKeyState(key) & 0x8000) != 0)
-                            {
-                                activeKey = key;
-                                activeKeyIsClick = false;
-                                break;
-                            }
-                        }
-                    }
+                    // Look for active key
+                    var found = FindActiveSpamKey(clickKeys, out activeKey, out useHold);
+                    if (found) isClickKey = true;
+                    else found = FindActiveSpamKey(noClickKeys, out activeKey, out useHold);
 
-                    if (activeKey != -1 && holdKey != -1 && !initialSetupDone)
+                    if (found && holdKey != -1 && useHold && !holdActive)
                     {
                         PostMessage(hWnd, WM_KEYDOWN, holdKey, 0);
                         Thread.Sleep(holdDelay);
                         PostMessage(hWnd, WM_KEYUP, holdKey, 0);
-                        initialSetupDone = true;
+                        holdActive = true;
                     }
 
                     Thread.Sleep(14);
+                    continue;
                 }
-                else if ((GetAsyncKeyState(activeKey) & 0x8000) != 0)
+
+                // If key is still being held
+                if ((GetAsyncKeyState(activeKey) & 0x8000) != 0)
                 {
                     WriteIntToMemory(hProcess, address, 500);
                     PostMessage(hWnd, WM_KEYDOWN, activeKey, 0);
 
-                    if (activeKeyIsClick)
+                    if (isClickKey)
                     {
                         PostMessage(hWnd, 0x0201, 0x0001, 0);
                         Thread.Sleep(spamDelay);
@@ -667,19 +688,17 @@ namespace Smookyz
                 }
                 else
                 {
-                    if (initialSetupDone && holdKey != -1)
+                    // Key was released
+                    if (holdActive && holdKey != -1 && useHold)
                     {
                         SendMessage(hWnd, WM_KEYDOWN, holdKey, 0);
                         Thread.Sleep(holdDelay);
                         SendMessage(hWnd, WM_KEYUP, holdKey, 0);
-                        initialSetupDone = false;
-                    }
-                    if (activeKey != -1)
-                    {
-                        PostMessage(hWnd, WM_KEYUP, activeKey, 0);
-                        activeKey = -1;
+                        holdActive = false;
                     }
 
+                    PostMessage(hWnd, WM_KEYUP, activeKey, 0);
+                    activeKey = -1;
                 }
             }
         }
@@ -693,8 +712,8 @@ namespace Smookyz
                     config.mouseBoostAddress,
                     config.holdKey,
                     config.holdKeyDelay,
-                    new List<int>(config.skillSpamClickKeys),
-                    new List<int>(config.skillSpamNoClickKeys),
+                    new List<SpamKey>(config.skillSpamClickKeys),
+                    new List<SpamKey>(config.skillSpamNoClickKeys),
                     config.skillSpamDelay
                 );
             })
