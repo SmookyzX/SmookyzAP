@@ -81,7 +81,7 @@ Format:
 - skillSpamClickKeys = F1,F2:false,F3
 - skillSpamNoClickKeys = F4:false,F5
 
-F1 and F3 will use HoldKey for autohold.
+F1, F3 and F5 will use HoldKey for autohold.
 
 F2 and F4 will not use HoldKey and autohold is disabled.
 
