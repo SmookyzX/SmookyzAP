@@ -83,4 +83,4 @@ On first run, a `config.ini` file will be created. Edit this file to set hotkeys
 
 ## Credits
 
-Created by [SmookyzX](https://github.com/SmookyzX)
+Created by [SmookyzX](https://gitlab.com/Smookyz)
