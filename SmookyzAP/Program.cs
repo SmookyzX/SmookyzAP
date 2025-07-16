@@ -91,7 +91,7 @@ namespace Smookyz
             public int combatKnifeDelay = 100;
 
             public int periodicKey = -1;
-            public int periodicDelay = -1; // milliseconds (default 10s)
+            public int periodicDelay = -1; 
 
             public int fullPauseKey = 0x23;
 
@@ -212,6 +212,7 @@ namespace Smookyz
                 reflectshieldKey = 
                 defenderKey = 
 
+            ; *** Don't forget to set your SP Treshold below ***
             [Settings]
                 spThreshold = 
                 windowTitle = HoneyRO ~
@@ -221,7 +222,7 @@ namespace Smookyz
             [Skill Spammer]
                 mouseBoostAddress = 
                 skillSpamClickKeys = F1,F2:false
-                skillSpamNoClickKeys = F3,F4:false
+                skillSpamNoClickKeys = 
                 skillSpamDelay = 1
                 holdKey = 
                 holdKeyDelay = 29
@@ -429,7 +430,7 @@ namespace Smookyz
         }
         static void CheckBuffs(IntPtr hProcess, int addr, Buffs buffs)
         {
-            int bufferSize = 33;
+            int bufferSize = 40;
             byte[] buffer = new byte[4 * bufferSize];
             if (!ReadProcessMemory(hProcess, (IntPtr)addr, buffer, buffer.Length, out _)) return;
 
