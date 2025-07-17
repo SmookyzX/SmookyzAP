@@ -214,7 +214,7 @@ namespace Smookyz
 
             ; *** Don't forget to set your SP Treshold below ***
             [Settings]
-                spThreshold = 
+                spThreshold = 40
                 windowTitle = HoneyRO ~
                 baseAddress = 010DCE10
                 autoBuffDelay = 50
