@@ -1,12 +1,5 @@
 Discord: smookyz2024
 
-*** REQUIRED TO DOWNLOAD .NET Runtime 8.0 for it to work *** 
-
-Download .NET runtime 8.0 -> https://dotnet.microsoft.com/en-us/download/dotnet/8.0
-
-*** You may need to "Unblock" the files. Right click on each extracted file. Click properties. At the bottom, there might be an "Unblock" checkbox. Unblock it and hit apply. Do this for all files. ***
-
-
 
 This autopotion solution aims to even the playing field for all WoE players allowing even the 300+ ping players to pot similar or EVEN FASTER than 50 ping players when the current hp drops.
 The bottleneck is the default item usage delay of 100ms. This means there is no reason to purchase other autopotion programs as they will simply not provide any meaningful gain when your ping is 40-50 or greater. 
@@ -58,7 +51,8 @@ A C# tool for automating potions, buffs, skill spam, and macros for Ragnarok Onl
 
 ## Configuration
 
-On first run, a `config.ini` file will be created. Edit this file to set hotkeys, delays, and features.
+- On first run, a `config.ini` file will be created. Edit this file to set hotkeys, delays, and features.
+- You may need to "Unblock" the files. Right click on each file. Click properties. At the bottom, there might be an "Unblock" checkbox. Check the Unblock box and hit apply. Do this for all files.
 
 ---
 
@@ -100,4 +94,4 @@ This allows more control over skills that do or do not require autohold
 
 ## Credits
 
-Created by [Smookyz](https://gitlab.com/Smookyz)
+Created by [SmookyzX](https://github.com/SmookyzX)

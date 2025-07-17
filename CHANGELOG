@@ -1,3 +1,9 @@
+[Changelog] v1.6
+
+Added Native Compilation
+
+Reduced CPU used by roughly 20%
+
 [Changelog] v1.55
 
 You can now specify whether each skill spam key uses the configured HoldKey or not.
