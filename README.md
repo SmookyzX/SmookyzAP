@@ -34,6 +34,7 @@ A C# tool for automating potions, buffs, skill spam, and macros for Ragnarok Onl
 - **Skill Spammer:** Spams configured skills with or without mouse clicks.
 - **Macro Switching:** Switches equipment/skills for SG Gypsy class.
 - **Chain Macro:** Runs a sequence of keys with customizable timing.
+- **Per-Key HoldKey Control**: Choose which skill spam keys use the autohold feature using :false suffix.
 - **Configurable Hotkeys & Delays**
 - **Console Status Display:** Real-time feedback (pause, high ping mode, etc.).
 
@@ -71,6 +72,22 @@ On first run, a `config.ini` file will be created. Edit this file to set hotkeys
 
 ---
 
+## Skill Spammer Key Format (New!)
+
+You can now specify whether each skill key should use the configured HoldKey for autohold.
+
+Format:
+
+- skillSpamClickKeys = F1,F2:false,F3
+- skillSpamNoClickKeys = F4:false,F5
+
+F1, F3 and F5 will use HoldKey for autohold.
+
+F2 and F4 will not use HoldKey and autohold is disabled.
+
+This allows more control over skills that do or do not require autohold
+
+---
 ## Hotkeys & Controls
 
 - **Pause/Resume:** `END` (default) – toggles autopot features on/off.
