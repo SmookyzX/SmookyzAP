@@ -24,15 +24,13 @@
 		<IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
 		<!-- Speeds up build -->
 
-		<!-- Add this -->
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-
 		<!-- Metadata -->
-		<Authors>SmookyzX</Authors>
+		<Authors>Smookyz</Authors>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<RepositoryUrl>https://github.com/SmookyzX/SmookyzAP</RepositoryUrl>
+		<RepositoryUrl>https://gitlab.com/smookyzx/smookyzap</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Copyright>© 2025 SmookyzX</Copyright>
+		<Copyright>© 2025 Smookyz</Copyright>
 	</PropertyGroup>
+
 
 </Project>

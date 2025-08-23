@@ -73,7 +73,7 @@ namespace Smookyz
             public double spThreshold = -1;
 
             public int HighPingModeToggle = 0x24;
-            public string windowTitle = "HoneyRO ~";
+            public string windowTitle = "";
             public int baseAddress = 0x010DCE10;
             public int autoBuffDelay = 50;
 
@@ -648,17 +648,18 @@ namespace Smookyz
         {
             bool holdActive = false;
             int activeKey = -1;
-            bool isClickKey = false;
             bool useHold = false;
 
             while (spammerRunning)
             {
+                bool isClickKey = clickKeys.Any(k => (GetAsyncKeyState(k.KeyCode) & 0x8000) != 0);
+
                 if (activeKey == -1)
                 {
                     // Look for active key
                     var found = FindActiveSpamKey(clickKeys, out activeKey, out useHold);
-                    if (found) isClickKey = true;
-                    else found = FindActiveSpamKey(noClickKeys, out activeKey, out useHold);
+                    if (!found)
+                        found = FindActiveSpamKey(noClickKeys, out activeKey, out useHold);
 
                     if (found && holdKey != -1 && useHold && !holdActive)
                     {
@@ -668,7 +669,7 @@ namespace Smookyz
                         holdActive = true;
                     }
 
-                    Thread.Sleep(14);
+                    Thread.Sleep(14); // small sleep only if no active key
                     continue;
                 }
 
@@ -680,9 +681,9 @@ namespace Smookyz
 
                     if (isClickKey)
                     {
-                        PostMessage(hWnd, 0x0201, 0x0001, 0);
+                        PostMessage(hWnd, 0x0201, 0x0001, 0); // mouse down
                         Thread.Sleep(spamDelay);
-                        PostMessage(hWnd, 0x0202, 0x0000, 0);
+                        PostMessage(hWnd, 0x0202, 0x0000, 0); // mouse up
                     }
 
                     Thread.Sleep(spamDelay);
@@ -703,6 +704,7 @@ namespace Smookyz
                 }
             }
         }
+
         static void StartUnifiedSpammerThread(IntPtr hProcess, IntPtr hWnd, Config config)
         {
             var thread = new Thread(() =>

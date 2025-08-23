@@ -41,7 +41,7 @@ A C# tool for automating potions, buffs, skill spam, and macros for Ragnarok Onl
 2. **Build:**  
    - Download or clone this repo:  
      ```sh
-     https://gitlab.com/smookyzx/smookyzap.git or git@gitlab.com:smookyzx/smookyzap.git
+     https://github.com/SmookyzX/SmookyzAP.git
      ```
    - Open in Visual Studio and build, or use CLI:
      ```sh
