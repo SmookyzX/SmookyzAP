@@ -12,7 +12,7 @@ SmookyzAP in action -> https://www.youtube.com/watch?v=ecfqVSuzZu8
 
 350 ping guild total domination -> https://www.youtube.com/watch?v=ful58PGnanU
 
-tldr to setup for your ragnarok server: Update the "Window title" to match your ragnarok client's window title. Update the mouseboostaddress and hpaddress as per your client version.
+tldr to setup for your ragnarok server: Update the "Window title" to match your ragnarok client's window title. Update the "mouseboostaddress" and the "baseaddress"(HP Address) as per your client version.
 
 ---
 
