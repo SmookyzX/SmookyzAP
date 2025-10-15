@@ -215,7 +215,7 @@ namespace Smookyz
             ; *** Don't forget to set your SP Treshold below ***
             [Settings]
                 spThreshold = 40
-                windowTitle = HoneyRO ~
+                windowTitle = Ragnarok Online
                 baseAddress = 010DCE10
                 autoBuffDelay = 50
 
